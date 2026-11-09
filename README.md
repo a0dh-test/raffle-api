@@ -69,6 +69,8 @@ curl -X POST localhost:3000/raffles/raffle-1/tickets \
 # {"tickets":[{"id":"9f0f…","raffleId":"raffle-1","userId":"user-alice","purchasedAt":"…"}, …],"balance":90}
 ```
 
+Interactive docs are served at `/openapi`, generated from the route schemas; the raw spec at `/openapi/json` imports into Postman or any OpenAPI client. Both are disabled when `NODE_ENV=production`.
+
 Every error has the same body: `{ "error": { "code": "INSUFFICIENT_BALANCE", "message": "…" } }`.
 
 | Status | Codes |

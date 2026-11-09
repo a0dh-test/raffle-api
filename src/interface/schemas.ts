@@ -7,7 +7,7 @@ export const PrizeSchema = t.Object({
   name: t.String(),
   description: t.String(),
   value: t.Number(),
-  imageUrl: t.Nullable(t.String()),
+  imageUrl: t.Union([t.String(), t.Null()]),
 });
 
 export const RaffleSchema = t.Object({
@@ -16,12 +16,12 @@ export const RaffleSchema = t.Object({
   description: t.String(),
   prize: PrizeSchema,
   ticketPrice: t.Number(),
-  maxTickets: t.Integer(),
-  ticketsSold: t.Integer(),
-  ticketsRemaining: t.Integer(),
-  drawDate: t.String(),
+  maxTickets: t.Number({ multipleOf: 1 }),
+  ticketsSold: t.Number({ multipleOf: 1 }),
+  ticketsRemaining: t.Number({ multipleOf: 1, description: "maxTickets minus ticketsSold" }),
+  drawDate: t.String({ description: "ISO 8601; purchases close at this time" }),
   status: t.Union([t.Literal("draft"), t.Literal("active"), t.Literal("drawn"), t.Literal("cancelled")]),
-  winnerId: t.Nullable(t.String()),
+  winnerId: t.Union([t.String(), t.Null()], { description: "Set once the raffle is drawn" }),
   createdAt: t.String(),
   updatedAt: t.String(),
 });
@@ -33,8 +33,13 @@ export const TicketSchema = t.Object({
   purchasedAt: t.String(),
 });
 
-export const PurchaseBody = t.Object({ quantity: t.Number({ multipleOf: 1, minimum: 1 }) });
-export const PurchaseResponse = t.Object({ tickets: t.Array(TicketSchema), balance: t.Number() });
+export const PurchaseBody = t.Object({
+  quantity: t.Number({ multipleOf: 1, minimum: 1, description: "Number of tickets to buy" }),
+});
+export const PurchaseResponse = t.Object({
+  tickets: t.Array(TicketSchema),
+  balance: t.Number({ description: "Balance left after the purchase" }),
+});
 export const ErrorBody = t.Object({ error: t.Object({ code: t.String(), message: t.String() }) });
 
 export const toRaffleDto = (r: IRaffle): typeof RaffleSchema.static => ({

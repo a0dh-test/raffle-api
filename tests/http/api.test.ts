@@ -22,12 +22,46 @@ const buy = (app: TestApp, raffleId: string, body: unknown, userId?: string) =>
     }),
   );
 
+// The OpenAPI plugin reads NODE_ENV when the app is built, so each docs test builds its own app.
+async function appWithNodeEnv(nodeEnv: string) {
+  const previous = Bun.env.NODE_ENV;
+  Bun.env.NODE_ENV = nodeEnv;
+  try {
+    return (await httpApp()).app;
+  } finally {
+    if (previous === undefined) delete Bun.env.NODE_ENV;
+    else Bun.env.NODE_ENV = previous;
+  }
+}
+
 describe("http api", () => {
   let app: TestApp;
   let resolve: Awaited<ReturnType<typeof httpApp>>["resolve"];
 
   beforeEach(async () => {
     ({ app, resolve } = await httpApp());
+  });
+
+  test("serves an OpenAPI spec of every route, with the purchase behind bearer auth", async () => {
+    const res = await get(await appWithNodeEnv("development"), "/openapi/json");
+    expect(res.status).toBe(200);
+    const spec = (await res.json()) as {
+      paths: Record<string, Record<string, { security?: unknown[] }>>;
+      components: { securitySchemes: Record<string, unknown> };
+    };
+    expect(Object.keys(spec.paths).sort()).toEqual(["/raffles", "/raffles/{id}", "/raffles/{id}/tickets"]);
+    expect(spec.components.securitySchemes.bearer).toMatchObject({ type: "http", scheme: "bearer" });
+    expect(spec.paths["/raffles/{id}/tickets"]?.post?.security).toEqual([{ bearer: [] }]);
+    expect(spec.paths["/raffles"]?.get?.security).toBeUndefined();
+    // Elysia's t.Integer publishes a string branch and t.Nullable a `nullable` key, which OpenAPI 3.1 rejects.
+    expect(JSON.stringify(spec)).not.toContain('"format":"integer"');
+    expect(JSON.stringify(spec)).not.toContain('"nullable"');
+  });
+
+  test("does not serve the OpenAPI docs in production", async () => {
+    const prodApp = await appWithNodeEnv("production");
+    expect((await get(prodApp, "/openapi/json")).status).toBe(404);
+    expect((await get(prodApp, "/openapi")).status).toBe(404);
   });
 
   test("lists only open raffles with nested prize, ticketsRemaining and ISO dates", async () => {

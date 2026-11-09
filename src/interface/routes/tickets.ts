@@ -17,6 +17,12 @@ export const TicketRoutes = createProvider(({ inject }) => {
     },
     {
       auth: true,
+      detail: {
+        summary: "Buy tickets",
+        description: "Debits the balance and creates the tickets in one transaction.",
+        tags: ["Tickets"],
+        security: [{ bearer: [] }],
+      },
       params: t.Object({ id: t.String() }),
       body: PurchaseBody,
       response: { 201: PurchaseResponse, 400: ErrorBody, 401: ErrorBody, 404: ErrorBody, 409: ErrorBody },

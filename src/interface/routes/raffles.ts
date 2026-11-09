@@ -9,9 +9,17 @@ export const RaffleRoutes = createProvider(({ inject }) => {
   const getRaffle = inject(GetRaffle);
 
   return new Elysia({ prefix: "/raffles" })
-    .get("/", () => list.execute().map(toRaffleDto), { response: { 200: t.Array(RaffleSchema) } })
+    .get("", () => list.execute().map(toRaffleDto), {
+      response: { 200: t.Array(RaffleSchema) },
+      detail: {
+        summary: "List open raffles",
+        description: "Active raffles whose draw date has not passed.",
+        tags: ["Raffles"],
+      },
+    })
     .get("/:id", ({ params }) => toRaffleDto(getRaffle.execute(params.id)), {
       params: t.Object({ id: t.String() }),
       response: { 200: RaffleSchema, 404: ErrorBody },
+      detail: { summary: "Get a raffle", description: "One raffle of any status.", tags: ["Raffles"] },
     });
 });
