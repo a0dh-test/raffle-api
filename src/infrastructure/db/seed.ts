@@ -2,7 +2,7 @@ import { count } from "drizzle-orm";
 import type { Db } from "./database";
 import { raffles, tickets, users } from "./schema";
 
-export const SEED_USERS = [
+const SEED_USERS = [
   { id: "user-alice", email: "alice@example.com", name: "Alice", balance: 100 },
   { id: "user-bob", email: "bob@example.com", name: "Bob", balance: 20 },
   { id: "user-carol", email: "carol@example.com", name: "Carol", balance: 0 },
