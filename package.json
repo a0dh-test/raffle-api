@@ -1,0 +1,26 @@
+{
+  "name": "raffle-api",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.6",
+    "@types/bun": "^1.4.4",
+    "drizzle-kit": "^0.31.11",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@elysiajs/openapi": "^1.4.17",
+    "difunkt": "^0.3.1",
+    "drizzle-orm": "^0.45.4",
+    "elysia": "^1.4.31"
+  },
+  "scripts": {
+    "dev": "bun --watch src/main.ts",
+    "start": "bun src/main.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
+  }
+}

@@ -1,0 +1,5 @@
+node_modules
+raffle.sqlite
+raffle.sqlite-*
+.DS_Store
+.idea
